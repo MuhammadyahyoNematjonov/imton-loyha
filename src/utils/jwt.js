@@ -1,12 +1,13 @@
-import jwt from "jsonwebtoken"
+import jwt from 'jsonwebtoken';
 
 const tokenGenerate = (payload) => {
-    const access = jwt.sign(payload, process.env.ACCESS_SECRET_KEY, { expiresIn: "60m" })
-    const refresh = jwt.sign(payload, process.env.refresh_SECRET_KEY, { expiresIn: "30d" })
-    return {
-        access,
-        refresh
-    }
-}
+    const secret = process.env.JWT_SECRET || 'olmachaqanij';
+    return jwt.sign(payload, secret, { expiresIn: '7d' });
+};
 
-export default tokenGenerate
+export const verifyToken = (token) => {
+    const secret = process.env.JWT_SECRET || 'olmachaqanij';
+    return jwt.verify(token, secret);
+};
+
+export default tokenGenerate;

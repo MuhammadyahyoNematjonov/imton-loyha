@@ -1,11 +1,38 @@
-import logger from "../logs/error.js"
+const errorHandler = (err, req, res, next) => {
+    let error = { ...err };
+    error.message = err.message;
 
-const middleware = (err, req, res, next) => {
-    const status = err.status || 500;
-    const message = err.message || "Internal Server Error";
+    // Mongoose bad ObjectId
+    if (err.name === 'CastError') {
+        const message = 'Resource not found';
+        error = { statusCode: 404, message };
+    }
 
-    logger.error(`${req.method} ${req.originalUrl} - ${status} - ${message}`)
+    // Mongoose duplicate key
+    if (err.code === 11000) {
+        const message = 'Duplicate field value entered';
+        error = { statusCode: 400, message };
+    }
 
-    res.status(status).json({ message })
-}
-export default middleware
+    if (err.name === 'ValidationError') {
+        const message = Object.values(err.errors).map(val => val.message);
+        error = { statusCode: 400, message };
+    }
+
+    if (err.name === 'JsonWebTokenError') {
+        const message = 'Invalid token';
+        error = { statusCode: 401, message };
+    }
+
+    if (err.name === 'TokenExpiredError') {
+        const message = 'Token expired';
+        error = { statusCode: 401, message };
+    }
+
+    res.status(error.statusCode || 500).json({
+        success: false,
+        error: error.message || 'Server Error'
+    });
+};
+
+export default errorHandler;

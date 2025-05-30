@@ -1,108 +1,145 @@
-import pool from "../config/database.js";
+import Transport from "../models/Transport.js";
+import User from "../models/User.js";
+import AdminPermission from "../models/AdminPermission.js";
+import Permission from "../models/Permission.js";
 import CustomError from "../utils/CustomError.js";
-import path from "path"
+import path from "path";
+
 class TransportService {
     constructor() { }
+
     async getTransport(branch_id, user_id) {
-        const findAdmin = await pool.query("select * from users where id=$1", [user_id])
-        if (findAdmin.rows.length === 0) throw new CustomError("admin not found", 404)
+        const findAdmin = await User.findById(user_id);
+        if (!findAdmin) throw new CustomError("admin not found", 404);
 
-        const findPermissionUser = await pool.query("select * from admin_permissions where user_id=$1", [user_id])
-        if (findPermissionUser.rows[0]?.can_read !== true) throw new CustomError("no allowed read permission", 401)
+        const findPermissionUser = await AdminPermission.findOne({ user_id });
+        if (!findPermissionUser?.can_read) {
+            throw new CustomError("no allowed read permission", 401);
+        }
 
-        const findBranchTransport = await pool.query("select * from transports where branch_id=$1", [branch_id])
+        const findBranchTransport = await Transport.find({ branch_id }).populate('branch_id', 'name location');
 
         return {
             status: 200,
             success: true,
-            data: findBranchTransport.rows
-        }
+            data: findBranchTransport
+        };
     }
+
     async getModel(model, user_id) {
-        const findAdmin = await pool.query("select * from users where id=$1", [user_id])
-        if (findAdmin.rows.length === 0) throw new CustomError("admin not found", 404)
+        const findAdmin = await User.findById(user_id);
+        if (!findAdmin) throw new CustomError("admin not found", 404);
 
-        const findPermissionUser = await pool.query("select * from admin_permissions where user_id=$1", [user_id])
-        if (findPermissionUser.rows[0]?.can_read !== true) throw new CustomError("no allowed read permission", 401)
+        const findPermissionUser = await AdminPermission.findOne({ user_id });
+        if (!findPermissionUser?.can_read) {
+            throw new CustomError("no allowed read permission", 401);
+        }
 
-        const findBranchTransport = await pool.query("select * from transports where model=$1", [model])
+        const findBranchTransport = await Transport.find({ model }).populate('branch_id', 'name location');
 
         return {
             status: 200,
             success: true,
-            data: findBranchTransport.rows
-        }
+            data: findBranchTransport
+        };
     }
+
     async addTransport(payload, user_id, img) {
-        const findAdmin = await pool.query("select * from users where id=$1", [user_id])
-        if (findAdmin.rows.length === 0) throw new CustomError("admin not found", 404)
+        const findAdmin = await User.findById(user_id);
+        if (!findAdmin) throw new CustomError("admin not found", 404);
 
-        const findPermissionUser = await pool.query("select * from admin_permissions where user_id=$1", [user_id])
-        if (findPermissionUser.rows[0]?.can_create !== true) throw new CustomError("no allowed create permission", 401)
+        const findPermissionUser = await AdminPermission.findOne({ user_id });
+        if (!findPermissionUser?.can_create) {
+            throw new CustomError("no allowed create permission", 401);
+        }
 
-        const filename = new Date().getTime() + "-" + Math.round(Math.random() * 1e9) + img.name
+        const filename = new Date().getTime() + "-" + Math.round(Math.random() * 1e9) + img.name;
         await new Promise((resolve, reject) => {
             img.mv(path.join(process.cwd(), "src", "uploads", filename), (err) => {
                 if (err) reject(err);
                 else resolve();
             });
         });
-        const result = await pool.query("insert into transports(model,color,img,price,branch_id) values($1,$2,$3,$4,$5) returning * ", [payload.model, payload.color, filename, payload.price, payload.branch_id])
+
+        const newTransport = new Transport({
+            model: payload.model,
+            color: payload.color,
+            img: filename,
+            price: payload.price,
+            branch_id: payload.branch_id
+        });
+
+        const result = await newTransport.save();
 
         return {
             status: 201,
             success: true,
-            data: result.rows[0]
-        }
+            data: result
+        };
     }
+
     async changeTransport(payload, transport_id, user_id, img) {
-        const findAdmin = await pool.query("select * from users where id=$1", [user_id])
-        if (findAdmin.rows.length === 0) throw new CustomError("admin not found", 404)
+        const findAdmin = await User.findById(user_id);
+        if (!findAdmin) throw new CustomError("admin not found", 404);
 
-        const findPermissionUser = await pool.query("select * from admin_permissions where user_id=$1", [user_id])
-        if (findPermissionUser.rows[0]?.can_update !== true) throw new CustomError("no allowed update permission", 401)
+        const findPermissionUser = await AdminPermission.findOne({ user_id });
+        if (!findPermissionUser?.can_update) {
+            throw new CustomError("no allowed update permission", 401);
+        }
 
-        const findUser = await pool.query("select * from transports where id=$1", [transport_id])
-        if (findUser.rows.length === 0) throw new CustomError("user not found", 404)
+        const findTransport = await Transport.findById(transport_id);
+        if (!findTransport) throw new CustomError("transport not found", 404);
 
-
-        const filename = new Date().getTime() + "-" + Math.round(Math.random() * 1e9) + img.name
+        const filename = new Date().getTime() + "-" + Math.round(Math.random() * 1e9) + img.name;
         await new Promise((res, rej) => {
             img.mv(path.join(process.cwd(), "src", "uploads", filename), (err) => {
                 if (err) rej(err);
                 else res();
             });
         });
-        const result = await pool.query("update transports set model=$1,color=$2,img=$3,price=$4,branch_id=$5 where id=$6 returning * ", [payload.model, payload.color, filename, payload.price, payload.branch_id, transport_id])
+
+        const result = await Transport.findByIdAndUpdate(
+            transport_id,
+            {
+                model: payload.model,
+                color: payload.color,
+                img: filename,
+                price: payload.price,
+                branch_id: payload.branch_id
+            },
+            { new: true }
+        );
 
         return {
-            status: 201,
+            status: 200,
             success: true,
-            data: result.rows[0]
+            data: result
+        };
+    }
+
+    async deleteTransport(transport_id, user_id) {
+        const findAdmin = await User.findById(user_id);
+        if (!findAdmin) throw new CustomError("admin not found", 404);
+
+        const findPermissionUser = await AdminPermission.findOne({ user_id });
+        if (!findPermissionUser?.can_delete) {
+            throw new CustomError("no allowed delete permission", 401);
         }
 
-    }
-    async deleteTransport(transport_id, user_id) {
-        const findAdmin = await pool.query("select * from users where id=$1", [user_id])
-        if (findAdmin.rows.length === 0) throw new CustomError("admin not found", 404)
+        const findTransport = await Transport.findById(transport_id);
+        if (!findTransport) throw new CustomError("transport not found", 404);
 
-        const findPermissionUser = await pool.query("select * from admin_permissions where user_id=$1", [user_id])
-        if (findPermissionUser.rows[0]?.can_delete !== true) throw new CustomError("no allowed delete permission", 401)
+        await Permission.deleteMany({ transport_id });
+        const result = await Transport.findByIdAndDelete(transport_id);
 
-        const findTransport = await pool.query("select * from transports where id=$1", [transport_id])
-        if (findTransport.rows.length === 0) throw new CustomError("transport not found", 404)
-
-        const deletePermission = await pool.query("delete from permissions where transport_id=$1", [transport_id])
-
-        const result = await pool.query("delete from transports where id=$1", [transport_id])
-        if (result.rowCount === 0) throw new CustomError("transport already deleted", 404)
+        if (!result) throw new CustomError("transport already deleted", 404);
 
         return {
             status: 200,
             success: true,
             message: "Transport deleted successfully"
-        }
+        };
     }
-
 }
-export default TransportService
+
+export default TransportService;
