@@ -13,7 +13,7 @@ const adminPermissionSchema = new mongoose.Schema({
     },
     can_read: {
         type: Boolean,
-        default: false
+        default: true
     },
     can_delete: {
         type: Boolean,

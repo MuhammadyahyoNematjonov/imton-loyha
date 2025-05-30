@@ -31,9 +31,9 @@ class TransportService {
         if (!findAdmin) throw new CustomError("admin not found", 404);
 
         const findPermissionUser = await AdminPermission.findOne({ user_id });
-        if (!findPermissionUser?.can_read) {
-            throw new CustomError("no allowed read permission", 401);
-        }
+        // if (!findPermissionUser?.can_read) {
+        //     throw new CustomError("no allowed read permission", 401);
+        // }
 
         const findBranchTransport = await Transport.find({ model }).populate('branch_id', 'name location');
 
@@ -49,9 +49,9 @@ class TransportService {
         if (!findAdmin) throw new CustomError("admin not found", 404);
 
         const findPermissionUser = await AdminPermission.findOne({ user_id });
-        if (!findPermissionUser?.can_create) {
-            throw new CustomError("no allowed create permission", 401);
-        }
+        // if (!findPermissionUser?.can_create) {
+        //     throw new CustomError("no allowed create permission", 401);
+        // }
 
         const filename = new Date().getTime() + "-" + Math.round(Math.random() * 1e9) + img.name;
         await new Promise((resolve, reject) => {
@@ -83,9 +83,9 @@ class TransportService {
         if (!findAdmin) throw new CustomError("admin not found", 404);
 
         const findPermissionUser = await AdminPermission.findOne({ user_id });
-        if (!findPermissionUser?.can_update) {
-            throw new CustomError("no allowed update permission", 401);
-        }
+            // if (!findPermissionUser?.can_update) {
+            //     throw new CustomError("no allowed update permission", 401);
+            // }
 
         const findTransport = await Transport.findById(transport_id);
         if (!findTransport) throw new CustomError("transport not found", 404);
@@ -122,9 +122,9 @@ class TransportService {
         if (!findAdmin) throw new CustomError("admin not found", 404);
 
         const findPermissionUser = await AdminPermission.findOne({ user_id });
-        if (!findPermissionUser?.can_delete) {
-            throw new CustomError("no allowed delete permission", 401);
-        }
+        // if (!findPermissionUser?.can_delete) {
+        //     throw new CustomError("no allowed delete permission", 401);
+        // }
 
         const findTransport = await Transport.findById(transport_id);
         if (!findTransport) throw new CustomError("transport not found", 404);

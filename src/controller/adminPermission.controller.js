@@ -40,5 +40,18 @@ class AdminPermissionController {
             next(error)
         }
     }
+
+
+async updateAdminPermission(req, res, next) {
+    try {
+        const id = req.params.id; 
+        
+        const result = await this.service.updateAdminPermission(req.body, id)
+        res.status(200).json(result)
+    } catch (error) {
+        console.log(error.message);
+        next(error)
+    }
+}
 }
 export default AdminPermissionController

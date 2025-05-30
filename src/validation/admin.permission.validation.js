@@ -1,6 +1,6 @@
 import Joi from "joi";
 const adminPermissionSchema = Joi.object({
-  user_id: Joi.number().required(),
+  user_id: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required(), 
   can_create: Joi.boolean(),
   can_read: Joi.boolean(),
   can_delete: Joi.boolean(),

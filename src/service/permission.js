@@ -11,9 +11,9 @@ class PermissionService {
         if (!findUser) throw new CustomError("user not found", 404);
 
         const checkadmin = await AdminPermission.findOne({ user_id: userId });
-        if (!checkadmin || !checkadmin.can_add_permission) {
-            throw new CustomError("No allowed addpermission", 401);
-        }
+        // if (!checkadmin || !checkadmin.can_add_permission) {
+        //     throw new CustomError("No allowed addpermission", 401);
+        // }
 
         const newPermission = new Permission(payload);
         const result = await newPermission.save();
@@ -30,9 +30,9 @@ class PermissionService {
         if (!findAdmin) throw new CustomError("admin not found", 404);
 
         const checkadminPermission = await AdminPermission.findOne({ user_id });
-        if (!checkadminPermission || !checkadminPermission.can_delete) {
-            throw new CustomError("No allowed delete permission", 401);
-        }
+        // if (!checkadminPermission || !checkadminPermission.can_delete) {
+        //     throw new CustomError("No allowed delete permission", 401);
+        // }
 
         const result = await Permission.findByIdAndDelete(permissionId);
         if (!result) throw new CustomError("permission not found", 404);
@@ -49,9 +49,9 @@ class PermissionService {
         if (!findAdmin) throw new CustomError("admin not found", 404);
 
         const checkadminPermission = await AdminPermission.findOne({ user_id });
-        if (!checkadminPermission || !checkadminPermission.can_update) {
-            throw new CustomError("No allowed update permission", 401);
-        }
+        // if (!checkadminPermission || !checkadminPermission.can_update) {
+        //     throw new CustomError("No allowed update permission", 401);
+        // }
 
         const result = await Permission.findByIdAndUpdate(permissionId, payload, { new: true });
         if (!result) throw new CustomError("permission not found", 404);
@@ -68,9 +68,9 @@ class PermissionService {
         if (!findAdmin) throw new CustomError("user not found", 404);
 
         const permisionUser = await AdminPermission.findOne({ user_id });
-        if (!permisionUser || !permisionUser.can_read) {
-            throw new CustomError("No allowed read permission", 401);
-        }
+        // if (!permisionUser || !permisionUser.can_read) {
+        //     throw new CustomError("No allowed read permission", 401);
+        // }
 
         const result = await Permission.find()
             .populate('user_id', 'username')

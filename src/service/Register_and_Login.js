@@ -13,7 +13,7 @@ class Register_and_Login {
             throw new CustomError("User already exists", 403);
 
         if (payload.password !== payload.repeat_password) {
-            throw new CustomError("Password mismatch", 400);
+            throw new CustomError("repeat_password xato ", 400);
         }
 
         const hashpassword = await bcrypt.hash(payload.password, 10);
@@ -47,7 +47,7 @@ class Register_and_Login {
 
         const isMatch = await bcrypt.compare(payload.password, findUser.password);
 
-        if (!isMatch)
+        if (isMatch)
             throw new CustomError("Username or password incorrect", 401);
 
         const { password, ...safeUser } = findUser.toObject();

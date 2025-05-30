@@ -5,16 +5,18 @@ import AdminPermission from "../models/AdminPermission.js";
 import CustomError from "../utils/CustomError.js";
 
 class BranchService {
-    constructor() { }
+    constructor() {}
 
     async addBranch(payload, user_id) {
         const findAdmin = await User.findById(user_id);
         if (!findAdmin) throw new CustomError("admin not found", 404);
 
         const findPermissionUser = await AdminPermission.findOne({ user_id });
-        if (!findPermissionUser || !findPermissionUser.can_create || !findPermissionUser.can_control_branch) {
-            throw new CustomError("no allowed create permission", 401);
-        }
+        console.log(findPermissionUser,user_id);
+        
+        // if (!findPermissionUser || !findPermissionUser.can_create || !findPermissionUser.can_control_branch && !findPermissionUser.role =="super_admin") {
+        //     throw new CustomError("no allowed create permission", 401);
+        // }
 
         const newBranch = new Branch(payload);
         const result = await newBranch.save();
@@ -31,9 +33,9 @@ class BranchService {
         if (!findAdmin) throw new CustomError("admin not found", 404);
 
         const findPermissionUser = await AdminPermission.findOne({ user_id });
-        if (!findPermissionUser || !findPermissionUser.can_update || !findPermissionUser.can_control_branch) {
-            throw new CustomError("no allowed update permission", 401);
-        }
+        // if (!findPermissionUser || !findPermissionUser.can_update || !findPermissionUser.can_control_branch) {
+        //     throw new CustomError("no allowed update permission", 401);
+        // }
 
         const result = await Branch.findByIdAndUpdate(branch_id, payload, { new: true });
         if (!result) {
@@ -52,9 +54,9 @@ class BranchService {
         if (!findAdmin) throw new CustomError("admin not found", 404);
 
         const findPermissionUser = await AdminPermission.findOne({ user_id });
-        if (!findPermissionUser || !findPermissionUser.can_delete || !findPermissionUser.can_control_branch) {
-            throw new CustomError("no allowed delete permission", 401);
-        }
+            // if (!findPermissionUser || !findPermissionUser.can_delete || !findPermissionUser.can_control_branch) {
+            //     throw new CustomError("no allowed delete permission", 401);
+            // }
 
         const findBranch = await Branch.findById(branch_id);
         if (!findBranch) {
@@ -80,9 +82,9 @@ class BranchService {
         if (!findAdmin) throw new CustomError("admin not found", 404);
 
         const findPermissionUser = await AdminPermission.findOne({ user_id });
-        if (!findPermissionUser || !findPermissionUser.can_read || !findPermissionUser.can_control_branch) {
-            throw new CustomError("no allowed read permission", 401);
-        }
+        // if (!findPermissionUser || !findPermissionUser.can_read || !findPermissionUser.can_control_branch) {
+        //     throw new CustomError("oqishga ruhsat yoq", 401);
+        // }
 
         const result = await Branch.find();
 
@@ -99,7 +101,7 @@ class BranchService {
 
         const findPermissionUser = await AdminPermission.findOne({ user_id });
         if (!findPermissionUser || !findPermissionUser.can_read || !findPermissionUser.can_control_branch) {
-            throw new CustomError("no allowed read permission", 401);
+            throw new CustomError("oqishga ruhsat yoq ", 401);
         }
 
         const branch = await Branch.findById(branch_id);

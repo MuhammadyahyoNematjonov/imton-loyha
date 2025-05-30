@@ -47,5 +47,16 @@ class TransportController {
             next(error)
         }
     }
+
+    async getTransport(req, res, next) {
+    try {
+        const branch_id = req.params.branch_id; 
+
+        const result = await this.service.getTransport(branch_id, req.user.id)
+        res.status(200).json(result)
+    } catch (error) {
+        next(error)
+    }
+}
 }
 export default TransportController

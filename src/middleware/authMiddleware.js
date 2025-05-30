@@ -7,7 +7,7 @@ export const authenticate = async (req, res, next) => {
         const token = req.header('Authorization')?.replace('Bearer ', '');
         
         if (!token) {
-            throw new CustomError('No token provided', 401);
+            throw new CustomError('yoq token kerak', 401);
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_secret_key_here');

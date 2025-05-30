@@ -3,8 +3,8 @@ import User from "../models/User.js";
 
 async function super_adminCreate() {
     try {
-        const username = 'Yahyobek@gmail.com';
-        const password = process.env.PASSWORD || 'superadmin123';
+        const username = 'yahyobek';
+        const password = process.env.PASSWORD || 'admin';
 
         const existingSuperAdmin = await User.findOne({ 
             username, 
@@ -12,7 +12,7 @@ async function super_adminCreate() {
         });
 
         if (existingSuperAdmin) {
-            console.log('Super admin already exists');
+            console.log('superadin yaratildi!');
             return;
         }
 
